@@ -1,0 +1,17 @@
+Objective:
+We need to evaluate assignment using LLM.
+
+Given Data:
+We have assignments.
+
+Method:
+- Clean the data
+- Think about model part
+
+
+Reading about the implementation of CodeJudge:
+1. Use prompting
+    zero shot
+    few shot
+
+the prompts are present in evaluation/humaneval/prompts.py
