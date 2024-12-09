@@ -1,3 +1,6 @@
+System Design: https://drive.google.com/file/d/1C4CK6erBh2rlCJuWjYT4SEuU6klwJrvv/view?usp=sharing
+
+
 Objective:
 We need to evaluate assignment using LLM.
 
@@ -35,4 +38,13 @@ https://cameronrwolfe.substack.com/p/llm-as-a-judge
 - Pointwise Scoring
 - COT, few shot
 - low temperature is important for deterministic resutls
-- 
+
+
+To Conclude:
+Objective: We need to evaluate code using LLM.
+    Need to think what novelty we are adding as evaluation of code using LLM is already been done.
+    
+Objective: Memory maintainance: as questions are inter linked 
+    The complexity in extraction of answers is not contributing to the research question we have.
+    Is the assignments right choice for our research question.
+
