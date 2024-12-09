@@ -28,3 +28,11 @@ Using LLMs for Evaluation
 https://cameronrwolfe.substack.com/p/llm-as-a-judge
 
 “While human evaluation is the gold standard for assessing human preferences, it is exceptionally slow and costly. To automate the evaluation, we explore the use of state-of-the-art LLMs, such as GPT-4, as a surrogate for humans.” - from [17]
+
+- Fintuning LLM is also a options
+- Several sources of bias exist that make this metric imperfect, so we should be sure to use LLM-as-a-Judge in tandem with human evaluation.
+- Pairwise Scoring
+- Pointwise Scoring
+- COT, few shot
+- low temperature is important for deterministic resutls
+- 
