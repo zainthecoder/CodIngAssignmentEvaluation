@@ -15,3 +15,16 @@ Reading about the implementation of CodeJudge:
     few shot
 
 the prompts are present in evaluation/humaneval/prompts.py
+
+
+A Survey on Evaluating Large Language Models in Code Generation Tasks
+https://arxiv.org/pdf/2408.16498
+
+- Generate Test Cases using LLM to evaluate the code.
+
+
+
+Using LLMs for Evaluation
+https://cameronrwolfe.substack.com/p/llm-as-a-judge
+
+“While human evaluation is the gold standard for assessing human preferences, it is exceptionally slow and costly. To automate the evaluation, we explore the use of state-of-the-art LLMs, such as GPT-4, as a surrogate for humans.” - from [17]
