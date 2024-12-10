@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
             # Get evaluation from LLM
             llm_response = get_llm_response(prompt, model, tokenizer)
-
+            print(llm_response)
             # Extract score and feedback from the LLM response
             llm_score = ""
             llm_feedback = ""

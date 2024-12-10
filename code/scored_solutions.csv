@@ -1,0 +1,101 @@
+question,answer,llm_score,llm_feedback
+"### Task 1.1 (3 points)
+
+Write a function `extract_words_tokens(any_string)` that takes a string as input and returns two numbers:
+1. num_words: The number of words in string
+2. num_tokens: The number of tokens in string (Please use the character-based tokenization.)
+
+**Hint:** The string can be a single word or a sentence and
+ can contain some special charecters, such as: ""!"", "","", "":""","def extract_words_tokens(any_string):
+    """"""
+    Args:
+      any_string: Python String
+
+    Returns:
+      Python String
+    """"""
+    # using split method to get a list of words present in the sentence.
+    word_list = any_string.split("" "")
+
+    #here len method returns the number of words present in the sentence.
+    num_words = len(word_list)
+
+    #here len method returns the number of characters present in the sentence.
+    num_tokens = len(any_string)
+
+    return(print(any_string, "":"", ""num_words:"", num_words, ""and"", ""num_tokens:"", num_tokens, ""respectively""))
+extract_words_tokens(""my name is zain ul"")",,
+"### Task 1.2 (4 points)
+
+Write a function `lemmatize(any_string, file_name)` that takes as input any string and a file-name: `lemmatization-en.txt` (please download the file [here](https://github.com/michmech/lemmatization-lists/blob/master/lemmatization-en.txt). It's a tab separated corpus) and returns a dictionary with all words as keys and the lemma of the words as values.
+
+**Hint:** To tokenize the string, please use the whitespace as the seperator. The string doesn't contain any special characters.","def lemmatize(any_string, file_name):
+
+    vocab = dict() # declaring our vocabulary of words and lemmas with words as keys and lemma as values
+    dictionary_of_lemmatized_words = dict() # a map to store the lemmatized words
+
+    with open(file_name, 'r',encoding='utf-8-sig') as file:
+      for line in file:
+        key,value = line.strip().split('\t') # stripping(removing any extra spaces at the beginning or end) and splitting the line on the basis of tab
+        vocab[value.lower()] = key.lower() # storing the word (lowercase) as key and lemma(lowercase) as value
+
+    for string in any_string.split(' '):
+      if string.lower() in vocab: # checking whether the word of a sentence(in lowercase) is present in the lemma vocabulary
+        dictionary_of_lemmatized_words[string] = vocab[string.lower()] # if present, assigned lemma of it
+      else:
+        dictionary_of_lemmatized_words[string] = string # else the word is lemma itself
+
+    return(print(dictionary_of_lemmatized_words))
+lemmatize('The striped bats are hanging on their feet for best','lemmatization-en.txt')",,
+"### Task 1.3 (3 points)
+
+Write a function `stemmer(string)` that takes a string as input and returns a string conaining only its stem.
+
+Create rules for the following forms of the verbs, Here is one example:
+
+- (Infinitive form) >> study - studi
+- (Present simple tense: Third person) >> studies - studi
+- (Continuous tense) >> studying - studi
+- (Past simple tense) >> studied - studi
+
+**Hint:** The string can be a single word or a sentence and
+ can contain some special charecters, such as: ""!"", "","", "":""","import re
+
+def stemmer(sentence):
+    # Define rules for stemming
+    rules = [
+        (r'y$', r'i'),             # Infinitive form
+        (r'ies$', r'i'),           # Present simple tense: Third person
+        (r'ying$', r'i'),           # Continuous tense
+        (r'ing$', r'i'),           # Continuous tense
+        (r'ied$', r'i'),            # Past simple tense
+    ]
+
+    # Split the sentence into words
+    words =  re.split(r'[,\s!:]', sentence) # split on the basis of ' ','!',',',':'
+
+    # Apply rules to each word
+    stemmed_words = []
+    for word in words:
+      if len(word) == 0: # incase of empty strings after splitting
+        continue
+      for pattern, replacement in rules:
+          if len(word) <= 3: # assuming that words with length less than 3 are already stem
+            continue
+          word = re.sub(pattern, replacement, word)
+      stemmed_words.append(word)
+
+    # Join the stemmed words back into a sentence
+    stemmed_string = ' '.join(stemmed_words)
+
+    return(print(stemmed_string))
+stemmer(""My boy is not studying and sleeping"")
+stemmer(""My boy is eating"")",,"**Strengths:**
+
+1. The solution is well-structured and follows a clear logic.
+2. It uses regular expressions to split the sentence into words, which is a good approach.
+3. The rules for stemming are defined clearly, and the code attempts to apply them to each word.
+
+**Weaknesses:**
+
+1. **Rule application**: The current implementation applies the rules"

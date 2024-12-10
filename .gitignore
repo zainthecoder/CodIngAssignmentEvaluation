@@ -1,3 +1,4 @@
 data/
 .venv
 token.json
+__pycache__
