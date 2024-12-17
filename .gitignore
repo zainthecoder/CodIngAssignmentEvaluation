@@ -2,3 +2,4 @@ data/
 .venv
 token.json
 __pycache__
+output.out
