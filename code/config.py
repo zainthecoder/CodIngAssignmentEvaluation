@@ -39,6 +39,9 @@ def get_reader_model():
             quantization_config=bnb_config,
             torch_dtype="auto",
             trust_remote_code=True,
+            do_sample=False,
+            temperature=0.1,
+            top_p=0.1
         )
     return model_singleton['reader_model']
 

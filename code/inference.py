@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Open output CSV
     with open(output_file, "w", newline="", encoding="utf-8") as output:
-        fieldnames = ["question", "answer", "llm_score", "llm_feedback"]
+        fieldnames = ["question", "answer", "llm_score", "llm_feedback", "file_name"]
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -47,6 +47,7 @@ if __name__ == "__main__":
         for qa_pair in tqdm(qa_data, desc="Scoring solutions", unit="question"):
             question = qa_pair.get("question")
             answer = qa_pair.get("answer")
+            file_name = qa_pair.get("file_name")
             
             # Extract total points from the question using regex
             import re
@@ -96,7 +97,8 @@ if __name__ == "__main__":
                 "question": question,
                 "answer": answer,
                 "llm_score": llm_score,
-                "llm_feedback": llm_feedback
+                "llm_feedback": llm_feedback,
+                "file_name": file_name
             })
 
 
