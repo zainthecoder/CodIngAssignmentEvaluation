@@ -24,7 +24,44 @@ Write a function `extract_words_tokens(any_string)` that takes a string as input
     num_tokens = len(any_string)
 
     return(print(any_string, "":"", ""num_words:"", num_words, ""and"", ""num_tokens:"", num_tokens, ""respectively""))
-extract_words_tokens(""my name is zain ul"")",,
+extract_words_tokens(""my name is zain ul"")",2,"[Provide brief feedback explaining the score]assistant
+
+Score: 2 out of 3 points
+
+Feedback: The solution is mostly correct and it successfully implements the character-based tokenization using the `split()` method. However, there are two issues with the solution. 
+
+1. The function is supposed to return two numbers, but it returns a tuple with the result of `print()`. The `print()` function should be replaced with a function that returns the result, such as `return`.
+
+2. The function is missing a docstring that describes what it does. It should be included to provide a clear understanding of the function's purpose.
+
+Here is the corrected solution:
+
+```python
+def extract_words_tokens(any_string):
+    """"""
+    Extracts the number of words and tokens from a given string.
+
+    Args:
+        any_string (str): The input string.
+
+    Returns:
+        tuple: A tuple containing the number of words and tokens in the string.
+    """"""
+    # using split method to get a list of words present in the sentence.
+    word_list = any_string.split("" "")
+
+    #here len method returns the number of words present in the sentence.
+    num_words = len(word_list)
+
+    #here len method returns the number of characters present in the sentence.
+    num_tokens = len(any_string)
+
+    return num_words, num_tokens
+
+print(extract_words_tokens(""my name is zain ul""))
+```
+
+This corrected solution will pass the evaluation and provide the correct output."
 "### Task 1.2 (4 points)
 
 Write a function `lemmatize(any_string, file_name)` that takes as input any string and a file-name: `lemmatization-en.txt` (please download the file [here](https://github.com/michmech/lemmatization-lists/blob/master/lemmatization-en.txt). It's a tab separated corpus) and returns a dictionary with all words as keys and the lemma of the words as values.
@@ -46,7 +83,53 @@ Write a function `lemmatize(any_string, file_name)` that takes as input any stri
         dictionary_of_lemmatized_words[string] = string # else the word is lemma itself
 
     return(print(dictionary_of_lemmatized_words))
-lemmatize('The striped bats are hanging on their feet for best','lemmatization-en.txt')",,
+lemmatize('The striped bats are hanging on their feet for best','lemmatization-en.txt')",1,"[Provide brief feedback explaining the score]assistant
+
+Score: 1 point
+Feedback: The solution is incomplete and does not meet the requirements of the task. It does not return a dictionary, but instead prints the result. Additionally, the function does not handle any potential exceptions that may occur when reading the file or splitting the input string. 
+
+Here's a revised version of the function that addresses these issues:
+
+```python
+def lemmatize(any_string, file_name):
+    """"""
+    Lemmatizes a given string using a predefined dictionary of words and their lemmas.
+
+    Args:
+    any_string (str): The input string to be lemmatized.
+    file_name (str): The name of the file containing the dictionary of words and their lemmas.
+
+    Returns:
+    dict: A dictionary where the keys are the words from the input string and the values are their lemmas.
+    """"""
+
+    vocab = {}
+    dictionary_of_lemmatized_words = {}
+
+    try:
+        with open(file_name, 'r', encoding='utf-8-sig') as file:
+            for line in file:
+                key, value = line.strip().split('\t')
+                vocab[value.lower()] = key.lower()
+
+        words = any_string.split(' ')
+        for word in words:
+            if word.lower() in vocab:
+                dictionary_of_lemmatized_words[word] = vocab[word.lower()]
+            else:
+                dictionary_of_lemmatized_words[word] = word
+
+        return dictionary_of_lemmatized_words
+
+    except FileNotFoundError:
+        print(f""File '{file_name}' not found."")
+        return {}
+    except Exception as e:
+        print(f""An error occurred: {e}"")
+        return {}
+```
+
+This revised function now correctly returns a dictionary, handles potential exceptions, and includes a docstring to explain its purpose and usage."
 "### Task 1.3 (3 points)
 
 Write a function `stemmer(string)` that takes a string as input and returns a string conaining only its stem.
@@ -90,12 +173,21 @@ def stemmer(sentence):
 
     return(print(stemmed_string))
 stemmer(""My boy is not studying and sleeping"")
-stemmer(""My boy is eating"")",,"**Strengths:**
+stemmer(""My boy is eating"")",2,"[Provide brief feedback explaining the score]assistant
 
-1. The solution is well-structured and follows a clear logic.
-2. It uses regular expressions to split the sentence into words, which is a good approach.
-3. The rules for stemming are defined clearly, and the code attempts to apply them to each word.
+Score: 2 points
+Feedback: The solution is generally correct and addresses the task requirements. However, there are some issues with the implementation:
 
-**Weaknesses:**
+1.  The function does not handle cases where the input string is empty or contains only whitespace characters.
+2.  The function does not handle cases where the input string contains punctuation marks at the beginning or end.
+3.  The function uses `print()` instead of returning the stemmed string, which makes it less flexible and reusable.
+4.  The function uses `re.split()` with a regular expression that may not match all possible punctuation marks (e.g., ellipses, dashes, etc.).
+5.  The function assumes that words with a length less than 3 are already stemmed, which may not be the case for all words (e.g., ""run"" is already a stem).
+6.  The function does not handle cases where the input string contains words with irregular plurals or irregular verb forms (e.g., ""child"" -> ""children"", ""go"" -> ""went"").
 
-1. **Rule application**: The current implementation applies the rules"
+To improve the solution, consider the following suggestions:
+
+*   Handle edge cases, such as empty strings or strings containing only whitespace characters.
+*   Use a more comprehensive regular expression for splitting the input string into words.
+*   Return the stemmed string instead of using `print()`.
+*   Consider using a more advanced stemming algorithm, such as Porter Stemmer or Snowball Stemmer, which can handle more complex cases."

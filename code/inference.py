@@ -10,8 +10,7 @@ def get_llm_response(prompt, model, tokenizer):
             "role": "system",
             "content": (
                 "You are an expert evaluator for technical solutions. "
-                "Your task is to assess the quality of solutions provided to specific questions and give a score between 1 and 10. "
-                "Also, provide a brief feedback explaining the score."
+                "Your task is to assess the quality of solutions provided to specific questions"
             )
         },
         {
@@ -21,7 +20,7 @@ def get_llm_response(prompt, model, tokenizer):
     ]
 
     model_inputs = tokenizer.apply_chat_template(messages, return_tensors="pt").to("cuda")
-    generated_ids = model.generate(model_inputs, max_new_tokens=100, do_sample=True)
+    generated_ids = model.generate(model_inputs, max_new_tokens=2000, do_sample=True)
     response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
     return response.strip()
 
@@ -48,35 +47,49 @@ if __name__ == "__main__":
         for qa_pair in tqdm(qa_data, desc="Scoring solutions", unit="question"):
             question = qa_pair.get("question")
             answer = qa_pair.get("answer")
-
+            
+            # Extract total points from the question using regex
+            import re
+            points_match = re.search(r"\((\d+)\s*points\)", question)
+            total_points = int(points_match.group(1)) if points_match else 10  # Default to 10 if no match
+            
             # Construct the LLM prompt
+            # Construct the LLM prompt with specified response format
             prompt = (
                 f"Here is a question and its proposed solution:\n"
                 f"Question: {question}\n"
                 f"Solution: {answer}\n\n"
-                "Please evaluate the solution on a scale of 1 to 10 and provide a brief feedback."
+                f"Please evaluate the solution and provide your response in the following format:\n\n"
+                f"Score: [Provide the score out of {total_points} points]\n"
+                f"Feedback: [Provide brief feedback explaining the score]"
             )
+
 
             # Get evaluation from LLM
             llm_response = get_llm_response(prompt, model, tokenizer)
             print(llm_response)
+            
             # Extract score and feedback from the LLM response
             llm_score = ""
             llm_feedback = ""
-            if "score:" in llm_response.lower():
-                try:
-                    score_start = llm_response.lower().find("score:") + len("score:")
-                    score_end = llm_response.find("\n", score_start)
-                    llm_score = llm_response[score_start:score_end].strip()
-                except ValueError:
-                    llm_score = "Unknown"
 
-            if "feedback:" in llm_response.lower():
-                try:
-                    feedback_start = llm_response.lower().find("feedback:") + len("feedback:")
-                    llm_feedback = llm_response[feedback_start:].strip()
-                except ValueError:
-                    llm_feedback = "No feedback provided."
+            # Extract the score using regex
+            score_match = re.search(r"score:\s*(\d+)", llm_response, re.IGNORECASE)
+            if score_match:
+                llm_score = score_match.group(1).strip()
+            else:
+                llm_score = "Unknown"
+
+            # Extract the feedback using regex
+            feedback_match = re.search(r"feedback:\s*(.*)", llm_response, re.IGNORECASE | re.DOTALL)
+            if feedback_match:
+                llm_feedback = feedback_match.group(1).strip()
+            else:
+                llm_feedback = "No feedback provided."
+
+            # Print for debugging
+            print(f"Extracted Score: {llm_score}")
+            print(f"Extracted Feedback: {llm_feedback}")
 
             # Write to the output CSV
             writer.writerow({
@@ -85,5 +98,6 @@ if __name__ == "__main__":
                 "llm_score": llm_score,
                 "llm_feedback": llm_feedback
             })
+
 
     print(f"Solution scoring completed and saved to {output_file}.")
