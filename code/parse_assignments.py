@@ -21,6 +21,14 @@ def remove_images_from_markdown(markdown_text):
     # Strip excessive blank lines after removing content
     return "\n".join([line for line in markdown_text.splitlines() if line.strip()])
 
+# Function to check if a markdown cell is introductory
+def is_introductory_cell(markdown_text):
+    # Check for patterns indicating an introduction
+    if re.match(r'^#\s+Introduction to .*?: Assignment \d+', markdown_text.strip()):
+        return True
+    if "In this exercise" in markdown_text or "we'll practice" in markdown_text:
+        return True
+    return False
 
 # Function to process a single notebook and extract Q&A
 def process_notebook(notebook_path):
@@ -30,12 +38,20 @@ def process_notebook(notebook_path):
     current_question = None
     current_answers = []
     temp_dataset = []
+    skip_code_cell = False  # Flag to skip code cells after introductory markdown
 
     for cell in notebook_content.cells:
         if cell.cell_type == "markdown":
-            # Treat markdown cells as questions if they contain task descriptions
             clean_content = remove_images_from_markdown(cell.source)
+            # Check if the cell is introductory, if so, skip it
+            if is_introductory_cell(clean_content):
+                skip_code_cell = True
+                current_question = None  # Clear the current question
+                continue  # Skip this markdown cell
+
+            # Treat markdown cells as questions if they contain task descriptions
             if "Task" in clean_content or clean_content.startswith("###"):
+                skip_code_cell = False  # Reset flag since it's a valid question
                 if current_question:
                     temp_dataset.append({
                         "file_name": os.path.basename(notebook_path),
@@ -45,6 +61,9 @@ def process_notebook(notebook_path):
                 current_question = clean_content.strip()
                 current_answers = []
         elif cell.cell_type == "code":
+            # Skip code cells if flagged by an introductory markdown
+            if skip_code_cell:
+                continue
             # Append code cells as answers to the current question
             if current_question:
                 current_answers.append(cell.source.strip())
