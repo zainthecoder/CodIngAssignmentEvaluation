@@ -50,7 +50,7 @@ def process_notebook(notebook_path):
                 continue  # Skip this markdown cell
 
             # Treat markdown cells as questions if they contain task descriptions
-            if "Task" in clean_content or clean_content.startswith("###"):
+            if "Task" in clean_content or clean_content.startswith("### Task"):
                 skip_code_cell = False  # Reset flag since it's a valid question
                 if current_question:
                     temp_dataset.append({
