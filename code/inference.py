@@ -61,7 +61,8 @@ if __name__ == "__main__":
             fieldnames = ["question", "answer", "llm_score", "llm_feedback", "file_name"]
             writer = csv.DictWriter(output, fieldnames=fieldnames)
             writer.writeheader()
-
+            
+            counter = 0
             for qa_pair in tqdm(qa_data, desc="Scoring solutions", unit="question"):
                 question = qa_pair.get("question", "No question provided")
                 answer = qa_pair.get("answer", "No answer provided")
@@ -102,6 +103,9 @@ if __name__ == "__main__":
                     "llm_feedback": llm_feedback,
                     "file_name": file_name
                 })
+                # counter +=1
+                # if counter>5:
+                #     break
 
         logger.info(f"Scoring completed. Results saved to {output_file}.")
     except Exception as e:
