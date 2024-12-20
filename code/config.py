@@ -20,7 +20,7 @@ access_token = data["access_token"]
 model_names = [
     "meta-llama/Llama-3.2-3B-Instruct",
     "meta-llama/Llama-3.1-8B-Instruct",
-    #"Qwen/Qwen2.5-1.5B-Instruct"
+    "Qwen/Qwen2.5-1.5B-Instruct"
 ]
 
 model_singleton = {}

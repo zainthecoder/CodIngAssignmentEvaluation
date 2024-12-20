@@ -44,6 +44,8 @@ def get_llm_response(prompt, model, tokenizer):
 if __name__ == "__main__":
     input_file = "questions_and_answers.json"
     output_file = "scored_solutions.csv"
+    k_passes = 3  # Number of iterations for averaging
+
 
     # Load model and tokenizer
     logger.info("Initializing model and tokenizer...")
@@ -52,13 +54,13 @@ if __name__ == "__main__":
     try:
 
         # Dynamically generate fieldnames based on model names
-        individual_fields = [
-        f"{model_name}_score" for model_name in models.keys()
-        ] + [
-        f"{model_name}_feedback" for model_name in models.keys()
-        ]
+        individual_fields = []
+        for model_name in models.keys():
+            for curr_pass in range(k_passes):
+                individual_fields.append(f"{model_name}_score_{curr_pass}_pass")
+                individual_fields.append(f"{model_name}_feedback_{curr_pass}_pass")
 
-        fieldnames = ["question", "answer", "file_name", "average_score", "combined_feedback"] + individual_fields
+        fieldnames = ["question", "answer", "file_name", "average_score"] + individual_fields
 
         # Load the questions and answers
         logger.info(f"Loading input data from {input_file}...")
@@ -86,62 +88,62 @@ if __name__ == "__main__":
                     f"Question: {question}\n"
                     f"Solution: {answer}\n\n"
                     f"Please evaluate the solution and provide your response in the following format:\n\n"
-                    f"Score: [Provide the score out of {total_points} points]\n"
+                    f"Score: [Provide the score out of {total_points} points. please return only integer or fraction.]\n"
                     f"Feedback: [Provide brief feedback explaining the score]"
                 )
                 
                 # Aggregation Multiple models
                 results = {}
-                aggregated_scores = 0
-                aggregated_feedback = []
+                model_scores = {model_name: 0 for model_name in models.keys()}
+                model_feedbacks = {model_name: [] for model_name in models.keys()}
 
-                for model_name, components in models.items():
+
+                # Perform K passes for each model
+                for curr_pass in range(k_passes):
                     
-                    model = components['model']
-                    tokenizer = components['tokenizer']
+                    for model_name, components in models.items():
+                        
+                        model = components['model']
+                        tokenizer = components['tokenizer']
+                        
+                        # Generate LLM response
+                        llm_response = get_llm_response(prompt, model, tokenizer)
+                        logger.debug(f"Raw LLM response: {llm_response}")
+
+                        print(llm_response)
+
+                        # Extract score and feedback
+                        score_match = re.search(r"score:\s*(\d+)", llm_response, re.IGNORECASE)
+                        llm_score = score_match.group(1).strip() if score_match else "Unknown"
+
+                        feedback_match = re.search(r"feedback:\s*(.*)", llm_response, re.IGNORECASE | re.DOTALL)
+                        llm_feedback = feedback_match.group(1).strip() if feedback_match else "No feedback provided."
+
+                        # Append score and feedback
+                        results[f"{model_name}_score_{curr_pass}_pass"] = int(llm_score)
+                        results[f"{model_name}_feedback_{curr_pass}_pass"] = llm_feedback
                     
-                    # Generate LLM response
-                    llm_response = get_llm_response(prompt, model, tokenizer)
-                    logger.debug(f"Raw LLM response: {llm_response}")
-
-                    print(llm_response)
-
-                    # Extract score and feedback
-                    score_match = re.search(r"score:\s*(\d+)", llm_response, re.IGNORECASE)
-                    llm_score = score_match.group(1).strip() if score_match else "Unknown"
-
-                    feedback_match = re.search(r"feedback:\s*(.*)", llm_response, re.IGNORECASE | re.DOTALL)
-                    llm_feedback = feedback_match.group(1).strip() if feedback_match else "No feedback provided."
-
-                    # Store individual scores and feedback
-                    results[f"{model_name}_score"] = llm_score
-                    results[f"{model_name}_feedback"] = llm_feedback
-
-                    aggregated_scores += float(llm_score)
-                    aggregated_feedback.append(f"{model_name}: {llm_feedback}")
-
-                    logger.info(f"Question: {question[:50]}... | Score: {llm_score} | File: {file_name}")
-
-                 # Calculate average score and combine feedback
-                print("aggre score: ",aggregated_scores)
-                print("model len:",len(models))
-                average_score = aggregated_scores / len(models)
-                combined_feedback = " | ".join(aggregated_feedback)
                 
+                avg_score=0 
+
+                for model_name in models.keys():
+                    for curr_pass in range(k_passes):
+                        avg_score += results[f"{model_name}_score_{curr_pass}_pass"]
+                
+                avg_score = avg_score/(k_passes*len(models))
                 # Add aggregated results to the dictionary
                 results.update({
                     "question": question,
                     "answer": answer,
                     "file_name": file_name,
-                    "average_score": average_score,
-                    "combined_feedback": combined_feedback
+                    "average_score": avg_score,
                 })
 
                 # Write results to the CSV file
                 writer.writerow(results)
 
                 counter +=1
-                if counter>5:
+                if counter>3:
                     break
 
         logger.info(f"Scoring completed. Results saved to {output_file}.")
