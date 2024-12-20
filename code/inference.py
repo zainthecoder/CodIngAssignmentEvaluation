@@ -50,6 +50,16 @@ if __name__ == "__main__":
     models = get_multiple_models()
 
     try:
+
+        # Dynamically generate fieldnames based on model names
+        individual_fields = [
+        f"{model_name}_score" for model_name in models.keys()
+        ] + [
+        f"{model_name}_feedback" for model_name in models.keys()
+        ]
+
+        fieldnames = ["question", "answer", "file_name", "average_score", "combined_feedback"] + individual_fields
+
         # Load the questions and answers
         logger.info(f"Loading input data from {input_file}...")
         with open(input_file, "r", encoding="utf-8") as jsonfile:
@@ -57,7 +67,6 @@ if __name__ == "__main__":
 
         logger.info(f"Scoring solutions and saving to {output_file}...")
         with open(output_file, "w", newline="", encoding="utf-8") as output:
-            fieldnames = ["question", "answer", "llm_score", "llm_feedback", "file_name"]
             writer = csv.DictWriter(output, fieldnames=fieldnames)
             writer.writeheader()
             
@@ -95,6 +104,8 @@ if __name__ == "__main__":
                     llm_response = get_llm_response(prompt, model, tokenizer)
                     logger.debug(f"Raw LLM response: {llm_response}")
 
+                    print(llm_response)
+
                     # Extract score and feedback
                     score_match = re.search(r"score:\s*(\d+)", llm_response, re.IGNORECASE)
                     llm_score = score_match.group(1).strip() if score_match else "Unknown"
@@ -122,16 +133,16 @@ if __name__ == "__main__":
                     "question": question,
                     "answer": answer,
                     "file_name": file_name,
-                    "average_score": round(average_score, 2) if isinstance(average_score, (int, float)) else average_score,
+                    "average_score": average_score,
                     "combined_feedback": combined_feedback
                 })
 
                 # Write results to the CSV file
                 writer.writerow(results)
 
-                # counter +=1
-                # if counter>5:
-                #     break
+                counter +=1
+                if counter>5:
+                    break
 
         logger.info(f"Scoring completed. Results saved to {output_file}.")
     except Exception as e:
