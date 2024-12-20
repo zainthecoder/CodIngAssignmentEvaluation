@@ -142,9 +142,9 @@ if __name__ == "__main__":
                 # Write results to the CSV file
                 writer.writerow(results)
 
-                counter +=1
-                if counter>3:
-                    break
+                # counter +=1
+                # if counter>3:
+                #     break
 
         logger.info(f"Scoring completed. Results saved to {output_file}.")
     except Exception as e:
