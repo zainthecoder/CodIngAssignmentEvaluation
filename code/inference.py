@@ -2,7 +2,7 @@ import json
 import csv
 import re
 import logging
-from config import get_reader_model, get_tokenizer
+from config import get_multiple_models
 from tqdm import tqdm
 
 # Configure logging
@@ -47,8 +47,7 @@ if __name__ == "__main__":
 
     # Load model and tokenizer
     logger.info("Initializing model and tokenizer...")
-    model = get_reader_model()
-    tokenizer = get_tokenizer()
+    models = get_multiple_models()
 
     try:
         # Load the questions and answers
@@ -81,32 +80,59 @@ if __name__ == "__main__":
                     f"Score: [Provide the score out of {total_points} points]\n"
                     f"Feedback: [Provide brief feedback explaining the score]"
                 )
+                
+                # Aggregation Multiple models
+                results = {}
+                aggregated_scores = 0
+                aggregated_feedback = []
 
-                # Generate LLM response
-                llm_response = get_llm_response(prompt, model, tokenizer)
-                logger.debug(f"Raw LLM response: {llm_response}")
+                for model_name, components in models.items():
+                    
+                    model = components['model']
+                    tokenizer = components['tokenizer']
+                    
+                    # Generate LLM response
+                    llm_response = get_llm_response(prompt, model, tokenizer)
+                    logger.debug(f"Raw LLM response: {llm_response}")
 
-                # Extract score and feedback
-                score_match = re.search(r"score:\s*(\d+)", llm_response, re.IGNORECASE)
-                llm_score = score_match.group(1).strip() if score_match else "Unknown"
+                    # Extract score and feedback
+                    score_match = re.search(r"score:\s*(\d+)", llm_response, re.IGNORECASE)
+                    llm_score = score_match.group(1).strip() if score_match else "Unknown"
 
-                feedback_match = re.search(r"feedback:\s*(.*)", llm_response, re.IGNORECASE | re.DOTALL)
-                llm_feedback = feedback_match.group(1).strip() if feedback_match else "No feedback provided."
+                    feedback_match = re.search(r"feedback:\s*(.*)", llm_response, re.IGNORECASE | re.DOTALL)
+                    llm_feedback = feedback_match.group(1).strip() if feedback_match else "No feedback provided."
 
-                logger.info(f"Question: {question[:50]}... | Score: {llm_score} | File: {file_name}")
+                    # Store individual scores and feedback
+                    results[f"{model_name}_score"] = llm_score
+                    results[f"{model_name}_feedback"] = llm_feedback
 
-                # Write results to CSV
-                writer.writerow({
+                    aggregated_scores += float(llm_score)
+                    aggregated_feedback.append(f"{model_name}: {llm_feedback}")
+
+                    logger.info(f"Question: {question[:50]}... | Score: {llm_score} | File: {file_name}")
+
+                 # Calculate average score and combine feedback
+                print("aggre score: ",aggregated_scores)
+                print("model len:",len(models))
+                average_score = aggregated_scores / len(models)
+                combined_feedback = " | ".join(aggregated_feedback)
+                
+                # Add aggregated results to the dictionary
+                results.update({
                     "question": question,
                     "answer": answer,
-                    "llm_score": llm_score,
-                    "llm_feedback": llm_feedback,
-                    "file_name": file_name
+                    "file_name": file_name,
+                    "average_score": round(average_score, 2) if isinstance(average_score, (int, float)) else average_score,
+                    "combined_feedback": combined_feedback
                 })
+
+                # Write results to the CSV file
+                writer.writerow(results)
+
                 # counter +=1
                 # if counter>5:
                 #     break
 
         logger.info(f"Scoring completed. Results saved to {output_file}.")
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}",exc_info=True)
